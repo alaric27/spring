@@ -87,16 +87,20 @@ public final class SqlSessionUtils {
     notNull(sessionFactory, NO_SQL_SESSION_FACTORY_SPECIFIED);
     notNull(executorType, NO_EXECUTOR_TYPE_SPECIFIED);
 
+    // 从 Spring 事务管理器 中获取 SqlSessionHolder，其中封装了 SqlSession 对象
     SqlSessionHolder holder = (SqlSessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
 
+    // 获取 SqlSessionHolder 中封装的 SqlSession 对象
     SqlSession session = sessionHolder(executorType, holder);
     if (session != null) {
       return session;
     }
 
     LOGGER.debug(() -> "Creating a new SqlSession");
+    // 若上述 SqlSession 为空，则通过 SqlSessionFactory 创建新的 SqlSession 对象
     session = sessionFactory.openSession(executorType);
 
+    // /将SqlSession 对象与 Spring 事务管理器绑定
     registerSessionHolder(sessionFactory, executorType, exceptionTranslator, session);
 
     return session;

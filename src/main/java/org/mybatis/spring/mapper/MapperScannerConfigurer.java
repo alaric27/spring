@@ -92,6 +92,9 @@ import org.springframework.util.StringUtils;
  */
 public class MapperScannerConfigurer implements BeanDefinitionRegistryPostProcessor, InitializingBean, ApplicationContextAware, BeanNameAware {
 
+  /**
+   * 指定扫描 的包，该字段可以包含多个通过逗号分隔的包名，这些指定的包以及其子包都会被扫描
+   */
   private String basePackage;
 
   private boolean addToConfig = true;
@@ -294,6 +297,8 @@ public class MapperScannerConfigurer implements BeanDefinitionRegistryPostProces
   }
 
   /**
+   * MapperScannerConfigurer 实现了 BeanDefinitionRegistryPostProcessor 接口 ，
+   * 该接口中的 postProcessBeanDefinitionRegistry()方法会在系统初始化的过程中被调用，该方法是 MapperScannerConfigurer 实现扫描的关键
    * {@inheritDoc}
    * 
    * @since 1.0.2
@@ -301,9 +306,11 @@ public class MapperScannerConfigurer implements BeanDefinitionRegistryPostProces
   @Override
   public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) {
     if (this.processPropertyPlaceHolders) {
+      //处理 applicationContext.xml 文件 中 MapperScannerConfigurer 配置的占位符
       processPropertyPlaceHolders();
     }
 
+    // 创建 ClassPathMapperScanner 对象
     ClassPathMapperScanner scanner = new ClassPathMapperScanner(registry);
     scanner.setAddToConfig(this.addToConfig);
     scanner.setAnnotationClass(this.annotationClass);

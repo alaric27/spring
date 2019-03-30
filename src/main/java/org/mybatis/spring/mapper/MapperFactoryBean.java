@@ -50,6 +50,9 @@ import org.springframework.beans.factory.FactoryBean;
  * @author Eduardo Macarron
  *
  * @see SqlSessionTemplate
+ *
+ * ClassPathMapperScanner 扫描Mapper接口后会生成 MapperFactoryBean
+ * MapperFactoryBean 实现了 FactoryBean接口，调用getObject 获取实际类型
  */
 public class MapperFactoryBean<T> extends SqlSessionDaoSupport implements FactoryBean<T> {
 

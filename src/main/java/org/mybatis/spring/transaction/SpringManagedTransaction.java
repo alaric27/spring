@@ -46,12 +46,24 @@ public class SpringManagedTransaction implements Transaction {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SpringManagedTransaction.class);
 
+  /**
+   * 与当前数据库连接对象关联的数据派对象
+   */
   private final DataSource dataSource;
 
+  /**
+   * 当前事务管理 中维护的数据库连接对象
+   */
   private Connection connection;
 
+  /**
+   * 标识该数据库连接对象是否由 Spring 的事务管理器管理
+   */
   private boolean isConnectionTransactional;
 
+  /**
+   * 事务是否自动提交
+   */
   private boolean autoCommit;
 
   public SpringManagedTransaction(DataSource dataSource) {
@@ -79,6 +91,7 @@ public class SpringManagedTransaction implements Transaction {
    * so we need to no-op that calls.
    */
   private void openConnection() throws SQLException {
+    // 从Spring 事务管理器中获取连接
     this.connection = DataSourceUtils.getConnection(this.dataSource);
     this.autoCommit = this.connection.getAutoCommit();
     this.isConnectionTransactional = DataSourceUtils.isConnectionTransactional(this.connection, this.dataSource);
@@ -118,6 +131,7 @@ public class SpringManagedTransaction implements Transaction {
    */
   @Override
   public void close() {
+    // 将数据库连接归还给 Spring 事务管理器
     DataSourceUtils.releaseConnection(this.connection, this.dataSource);
   }
     

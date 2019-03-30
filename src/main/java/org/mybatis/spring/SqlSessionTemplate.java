@@ -76,10 +76,16 @@ import org.springframework.dao.support.PersistenceExceptionTranslator;
  */
 public class SqlSessionTemplate implements SqlSession, DisposableBean {
 
+  /**
+   * 用于创建 SqlSession 对象的工厂类
+   */
   private final SqlSessionFactory sqlSessionFactory;
 
   private final ExecutorType executorType;
 
+  /**
+   * 通过 JDK 动态代理 生成的代理对象
+   */
   private final SqlSession sqlSessionProxy;
 
   private final PersistenceExceptionTranslator exceptionTranslator;
@@ -425,17 +431,21 @@ public class SqlSessionTemplate implements SqlSession, DisposableBean {
   private class SqlSessionInterceptor implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+
+      // 通过静态方法 SqlSessionUtils.getSession()获取SqlSession对象
       SqlSession sqlSession = getSqlSession(
           SqlSessionTemplate.this.sqlSessionFactory,
           SqlSessionTemplate.this.executorType,
           SqlSessionTemplate.this.exceptionTranslator);
       try {
         Object result = method.invoke(sqlSession, args);
+        // 检测事务是否由 Spring进行管理，并据此决定是否提交事务
         if (!isSqlSessionTransactional(sqlSession, SqlSessionTemplate.this.sqlSessionFactory)) {
           // force commit even on non-dirty sessions because some databases require
           // a commit/rollback before calling close()
           sqlSession.commit(true);
         }
+        // 返回数据库操作的相应结果
         return result;
       } catch (Throwable t) {
         Throwable unwrapped = unwrapThrowable(t);

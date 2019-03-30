@@ -58,6 +58,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 
 /**
+ * 在与 spring 集成时， MyBatis 中的 SqlSessionFactory 对象则是由 SqlSessionFactoryBean创建的
  * {@code FactoryBean} that creates an MyBatis {@code SqlSessionFactory}.
  * This is the usual way to set up a shared MyBatis {@code SqlSessionFactory} in a Spring application context;
  * the SqlSessionFactory can then be passed to MyBatis-based DAOs via dependency injection.
@@ -423,6 +424,7 @@ public class SqlSessionFactoryBean implements FactoryBean<SqlSessionFactory>, In
     final Configuration targetConfiguration;
 
     XMLConfigBuilder xmlConfigBuilder = null;
+    // 如采 Configuration 对象存在，则使用指定的 Configuration 对象并对其进行配置
     if (this.configuration != null) {
       targetConfiguration = this.configuration;
       if (targetConfiguration.getVariables() == null) {
@@ -431,9 +433,11 @@ public class SqlSessionFactoryBean implements FactoryBean<SqlSessionFactory>, In
         targetConfiguration.getVariables().putAll(this.configurationProperties);
       }
     } else if (this.configLocation != null) {
+      // 创建 XMLConfigBuilder 对象，读取指定的配置文件
       xmlConfigBuilder = new XMLConfigBuilder(this.configLocation.getInputStream(), null, this.configurationProperties);
       targetConfiguration = xmlConfigBuilder.getConfiguration();
     } else {
+      // 直接创建 Configuration 对象并进行配置
       LOGGER.debug(() -> "Property 'configuration' or 'configLocation' not specified, using default MyBatis Configuration");
       targetConfiguration = new Configuration();
       Optional.ofNullable(this.configurationProperties).ifPresent(targetConfiguration::setVariables);
@@ -504,10 +508,12 @@ public class SqlSessionFactoryBean implements FactoryBean<SqlSessionFactory>, In
       }
     }
 
+    // 给Configuration 设置Environment。包含数据源及事务工厂
     targetConfiguration.setEnvironment(new Environment(this.environment,
         this.transactionFactory == null ? new SpringManagedTransactionFactory() : this.transactionFactory,
         this.dataSource));
 
+    //根据 mapperLocations 配置，处理映射配置文件以及相应的Mapper接口
     if (!isEmpty(this.mapperLocations)) {
       for (Resource mapperLocation : this.mapperLocations) {
         if (mapperLocation == null) {
@@ -529,6 +535,7 @@ public class SqlSessionFactoryBean implements FactoryBean<SqlSessionFactory>, In
       LOGGER.debug(() -> "Property 'mapperLocations' was not specified or no matching resources found");
     }
 
+    // 最终调用SqlSessionFactoryBuilder.build ()方法，创建 sqlSessionFactory 对象并返回
     return this.sqlSessionFactoryBuilder.build(targetConfiguration);
   }
 

@@ -23,6 +23,7 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.dao.support.DaoSupport;
 
 /**
+ * 帮助类，可以获取SqlSessionTemplate 和 SqlSession
  * Convenient super class for MyBatis SqlSession data access objects.
  * It gives you access to the template which can then be used to execute SQL methods.
  * <p>

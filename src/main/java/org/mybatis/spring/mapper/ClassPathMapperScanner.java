@@ -152,6 +152,8 @@ public class ClassPathMapperScanner extends ClassPathBeanDefinitionScanner {
    */
   @Override
   public Set<BeanDefinitionHolder> doScan(String... basePackages) {
+    // 遍历 basePackages 中指定的所有包，扫描每个包下的 Java 文件并进行解析。
+    // 使用之前注册的过滤器进行过滤，得到符合条件的 BeanDefinitionHolder 对象
     Set<BeanDefinitionHolder> beanDefinitions = super.doScan(basePackages);
 
     if (beanDefinitions.isEmpty()) {
